@@ -41,7 +41,7 @@ public class AuthService {
 
         emailService.sendVerificationEmail(savedUser.getEmail(), verificationToken);
 
-        return new AuthResponse(token, user.getEmail(), user.getRole());
+        return new AuthResponse(null, user.getEmail(), user.getRole(), user.isVerified());
     }
 
     public AuthResponse login(LoginRequest data) {
@@ -51,9 +51,13 @@ public class AuthService {
             throw new CustomException(HttpStatus.BAD_REQUEST,"Wrong password");
         }
 
+        if(!user.isVerified()) {
+            throw new CustomException(HttpStatus.BAD_REQUEST,"User is not verified");
+        }
+
         String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole());
 
-        return new AuthResponse(token, user.getEmail(), user.getRole());
+        return new AuthResponse(token, user.getEmail(), user.getRole(), user.isVerified());
     }
 
 
